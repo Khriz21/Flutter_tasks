@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_tasks/screens/sigup_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/providers.dart';
@@ -31,10 +32,7 @@ class LoginScreen extends StatelessWidget {
                         style: Theme.of(context).textTheme.headline4,
                       ),
                       const SizedBox(height: 30),
-                      ChangeNotifierProvider(
-                        create: (_) => LoginProvider(),
-                        child: _LoginForm(),
-                      )
+                      _LoginForm(),
                     ],
                   ),
                 ),
@@ -100,9 +98,8 @@ class _LoginForm extends StatelessWidget {
           const SizedBox(height: 10),
 
           TextButton(
-            onPressed: () {},
+            onPressed: ()=> Navigator.pushReplacementNamed(context, SigupScreen.routerName),
             child: const Text('No tienes cuenta?'),
-
           ),
         ],
       ),
