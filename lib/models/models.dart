@@ -1,0 +1,1 @@
+export 'package:my_tasks/models/user.dart';

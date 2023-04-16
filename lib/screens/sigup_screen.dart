@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../providers/providers.dart';
 import '../ui/input_decoration.dart';
 import 'package:my_tasks/screens/screens.dart';
-import 'package:my_tasks/widgets/card_container.dart';
-import 'package:my_tasks/widgets/witgets.dart';
+import 'package:my_tasks/widgets/widtgets.dart';
 
 class SigupScreen extends StatelessWidget {
   const SigupScreen({super.key});
@@ -28,7 +25,7 @@ class SigupScreen extends StatelessWidget {
                       const SizedBox(height: 10),
                       Text(
                         'Crear cuenta',
-                        style: Theme.of(context).textTheme.headline4,
+                        style: Theme.of(context).textTheme.headlineMedium,
                       ),
                       const SizedBox(height: 30),
                       _SigupForm()
@@ -57,11 +54,14 @@ class _SigupFormState extends State<_SigupForm> {
   final lastNameCtrl = TextEditingController();
   final birthdateCtrt = TextEditingController();
 
+  final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
-    final loginForm = Provider.of<LoginProvider>(context);
+    // final loginForm = Provider.of<LoginProvider>(context);
     return Form(
-      autovalidateMode: AutovalidateMode.onUserInteraction,
+      key: _formKey,
+      autovalidateMode: AutovalidateMode.always,
       child: Column(
         children: [
           // Name
@@ -76,8 +76,8 @@ class _SigupFormState extends State<_SigupForm> {
             ),
             validator: (value) {
               return (value != null && value.length >= 3)
-                  ? null
-                  : 'Debe escribir un nombre valideo';
+                ? null
+              : 'Debe escribir un nombre valideo';
             },
           ),
 
@@ -93,8 +93,8 @@ class _SigupFormState extends State<_SigupForm> {
             ),
             validator: (value) {
               return (value != null && value.length >= 3)
-                  ? null
-                  : 'Este campo es hobligatorio';
+                ? null
+              : 'Este campo es hobligatorio';
             },
           ),
 
@@ -111,7 +111,7 @@ class _SigupFormState extends State<_SigupForm> {
             validator: (value) {
               String pattern = r'^(?:3[01]|[12][0-9]|0?[1-9])([\-/.])(0?[1-9]|1[1-2])\1\d{4}$';
               RegExp regExp = RegExp(pattern);
-              return regExp.hasMatch(value ?? '') ?null : 'Fecha no valida';
+              return regExp.hasMatch(value ?? '') ? null : 'Fecha no valida';
             },
           ),
 
@@ -126,10 +126,8 @@ class _SigupFormState extends State<_SigupForm> {
               label: 'Correo electrónico',
             ),
             validator: (value) {
-              String pattern =
-                  r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+              String pattern = r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
               RegExp regExp = RegExp(pattern);
-
               return regExp.hasMatch(value ?? '') ? null : 'Correo no valido';
             },
           ),
@@ -148,7 +146,7 @@ class _SigupFormState extends State<_SigupForm> {
             validator: (value) {
               return (value != null && value.length >= 6)
                   ? null
-                  : 'La contraña debe tener almenos 6 caracteres';
+              : 'La contraña debe tener almenos 6 caracteres';
             },
           ),
 
@@ -168,15 +166,17 @@ class _SigupFormState extends State<_SigupForm> {
                 return 'La contraseña no coinside';
               }
               return (value != null && value.length >= 6)
-                  ? null
-                  : 'La contraña debe tener almenos 6 caracteres';
+                ? null
+              : 'La contraña debe tener almenos 6 caracteres';
             },
           ),
 
           const SizedBox(height: 30),
 
-          _Button(birthdateCtrt: birthdateCtrt),
-
+          SaveButton(
+            submit: saveUser,
+            text: 'Guardar',
+          ),
           const SizedBox(height: 10),
 
           TextButton(
@@ -188,64 +188,13 @@ class _SigupFormState extends State<_SigupForm> {
       ),
     );
   }
-}
 
-class _Button extends StatelessWidget {
-  const _Button({
-    Key? key,
-    required this.birthdateCtrt,
-  }) : super(key: key);
-
-  final TextEditingController birthdateCtrt;
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialButton(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      disabledColor: Colors.grey,
-      elevation: 0,
-      color: Colors.deepPurple,
-      onPressed: () {
-        final String date =
-            '${birthdateCtrt.text.trim().substring(6, 10)}/${birthdateCtrt.text.trim().substring(3, 6)}${birthdateCtrt.text.trim().substring(0, 2)}';
-        print(date.replaceAll('/', '-'));
-      },
-      /* loginForm.isLoading
-          ? null
-          : () async {
-              FocusScope.of(context).unfocus();
-
-              if (!loginForm.isValidForm()) return;
-
-              loginForm.isLoading = true;
-
-              await Future.delayed(
-                const Duration(seconds: 2),
-              );
-
-              loginForm.isLoading = false;
-
-              // ignore: use_build_context_synchronously
-              Navigator.pushReplacementNamed(
-                context,
-                HomeScreen.routerName,
-              );
-            }, */
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 80,
-          vertical: 15,
-        ),
-        child: const Text(
-          // loginForm.isLoading ? 'Espere' : 'Guardar',
-          'Guardar',
-          style: TextStyle(
-            color: Colors.white,
-          ),
-        ),
-      ),
-    );
+  // Funcion para guardar el nuevo usuario
+  Future<void> saveUser() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      late String birthdate = birthdateCtrt.text.trim();
+      birthdate = '${birthdate.substring(6, 10)}/${birthdate.substring(3, 6)}${birthdate.substring(0, 2)}';
+      if (mounted) Navigator.pushReplacementNamed(context, HomeScreen.routerName);
+    }
   }
 }

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:my_tasks/screens/sigup_screen.dart';
+
 import 'package:provider/provider.dart';
 
 import '../providers/providers.dart';
 import '../ui/input_decoration.dart';
 import 'package:my_tasks/screens/screens.dart';
-import 'package:my_tasks/widgets/card_container.dart';
-import 'package:my_tasks/widgets/witgets.dart';
+import 'package:my_tasks/screens/sigup_screen.dart';
+import 'package:my_tasks/widgets/widtgets.dart';
+
+import '../ui/show_alert.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -29,7 +31,7 @@ class LoginScreen extends StatelessWidget {
                       const SizedBox(height: 10),
                       Text(
                         'Iniciar sesión',
-                        style: Theme.of(context).textTheme.headline4,
+                        style: Theme.of(context).textTheme.headlineMedium,
                       ),
                       const SizedBox(height: 30),
                       _LoginForm(),
@@ -45,12 +47,21 @@ class LoginScreen extends StatelessWidget {
   }
 }
 
-class _LoginForm extends StatelessWidget {
+class _LoginForm extends StatefulWidget {
+  @override
+  State<_LoginForm> createState() => _LoginFormState();
+}
+
+class _LoginFormState extends State<_LoginForm> {
+  final _formKey = GlobalKey<FormState>();
+  final emailCtrl = TextEditingController();
+  final passwordlCtrl = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
-    final loginForm = Provider.of<LoginProvider>(context);
+    final autProvider = Provider.of<AuthProvider>(context);
     return Form(
-      key: key,
+      key: _formKey,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       child: Column(
         children: [
@@ -63,7 +74,7 @@ class _LoginForm extends StatelessWidget {
               hinText: 'pablito@gmail.com',
               label: 'Correo electrónico',
             ),
-            onChanged: (value) => loginForm.email = value,
+            controller: emailCtrl,
             validator: (value) {
               String pattern =
                   r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
@@ -83,7 +94,7 @@ class _LoginForm extends StatelessWidget {
               hinText: '****',
               label: 'Contraseña',
             ),
-            onChanged: (value) => loginForm.password = value,
+            controller: passwordlCtrl,
             validator: (value) {
               return (value != null && value.length >= 6)
                   ? null
@@ -93,70 +104,40 @@ class _LoginForm extends StatelessWidget {
 
           const SizedBox(height: 30),
 
-          _Button(loginForm: loginForm),
+          SaveButton(
+            text: autProvider.authenticating ? 'Espere' : 'Ingresar',
+            submit:
+                autProvider.authenticating ? null : () => submit(autProvider),
+          ),
 
           const SizedBox(height: 10),
 
           TextButton(
-            onPressed: ()=> Navigator.pushReplacementNamed(context, SigupScreen.routerName),
+            onPressed: () =>
+                Navigator.pushReplacementNamed(context, SigupScreen.routerName),
             child: const Text('No tienes cuenta?'),
           ),
         ],
       ),
     );
   }
-}
 
-class _Button extends StatelessWidget {
-  const _Button({
-    Key? key,
-    required this.loginForm,
-  }) : super(key: key);
+  Future<void> submit(AuthProvider autProvider) async {
+    FocusScope.of(context).unfocus();
+    if (!_formKey.currentState!.validate()) return;
 
-  final LoginProvider loginForm;
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialButton(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      disabledColor: Colors.grey,
-      elevation: 0,
-      color: Colors.deepPurple,
-      onPressed: loginForm.isLoading
-          ? null
-          : () async {
-              FocusScope.of(context).unfocus();
-
-              if (!loginForm.isValidForm()) return;
-
-              loginForm.isLoading = true;
-
-              await Future.delayed(
-                const Duration(seconds: 2),
-              );
-
-              loginForm.isLoading = false;
-
-              // ignore: use_build_context_synchronously
-              Navigator.pushReplacementNamed(
-                context,
-                HomeScreen.routerName,
-              );
-            },
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 80,
-          vertical: 15,
-        ),
-        child: Text(
-          loginForm.isLoading ? 'Espere' : 'Ingresar',
-          style: const TextStyle(
-            color: Colors.white,
-          ),
-        ),
-      ),
+    final msg = await autProvider.login(
+      emailCtrl.text.trim(),
+      passwordlCtrl.text.trim(),
     );
+
+    if (msg != null) {
+      if (!mounted) return;
+      showAlert(context, 'Error', msg);
+      return;
+    }
+
+    if (!mounted) return;
+    Navigator.pushReplacementNamed(context, HomeScreen.routerName);
   }
 }

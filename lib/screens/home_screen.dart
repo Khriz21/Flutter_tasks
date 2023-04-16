@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:my_tasks/widgets/witgets.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -11,7 +10,7 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Home')),
       body: const Center(
-        child: DatePicker(),
+        child: Text('Home'),
       ),
     );
   }
